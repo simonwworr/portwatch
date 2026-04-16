@@ -34,6 +34,10 @@ func runAlert(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("scan %s: %w", host, err)
 	}
 
+	if err := os.MkdirAll(alertStateDir, 0o755); err != nil {
+		return fmt.Errorf("create state dir: %w", err)
+	}
+
 	stateFile := fmt.Sprintf("%s/%s.json", alertStateDir, host)
 	prev, err := state.Load(stateFile)
 	if err != nil && !os.IsNotExist(err) {
@@ -54,8 +58,5 @@ func runAlert(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	if err := os.MkdirAll(alertStateDir, 0o755); err != nil {
-		return err
-	}
 	return state.Save(stateFile, ports)
 }
