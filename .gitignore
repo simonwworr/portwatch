@@ -1,0 +1,12 @@
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.out
+Thumbs.db
+vendor/
+Desktop.ini
+.vscode/
+*.test
+*~
