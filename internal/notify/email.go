@@ -31,6 +31,12 @@ func (e *emailChannel) Send(host string, diff state.Diff) error {
 	if len(e.cfg.To) == 0 {
 		return fmt.Errorf("email: no recipients configured")
 	}
+	if e.cfg.From == "" {
+		return fmt.Errorf("email: no sender address configured")
+	}
+	if e.cfg.Host == "" {
+		return fmt.Errorf("email: no SMTP host configured")
+	}
 
 	subject := fmt.Sprintf("[portwatch] Port changes detected on %s", host)
 	body := formatBody(host, diff)
@@ -48,5 +54,8 @@ func (e *emailChannel) Send(host string, diff state.Diff) error {
 	addr := fmt.Sprintf("%s:%d", e.cfg.Host, e.cfg.Port)
 	auth := smtp.PlainAuth("", e.cfg.Username, e.cfg.Password, e.cfg.Host)
 
-	return smtp.SendMail(addr, auth, e.cfg.From, e.cfg.To, []byte(msg))
+	if err := smtp.SendMail(addr, auth, e.cfg.From, e.cfg.To, []byte(msg)); err != nil {
+		return fmt.Errorf("email: failed to send to %s: %w", addr, err)
+	}
+	return nil
 }
