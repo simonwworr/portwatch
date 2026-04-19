@@ -82,3 +82,13 @@ func TestPinFile_CreatedInDir(t *testing.T) {
 		t.Error("pins.json missing host-x")
 	}
 }
+
+func TestPinRemove_NonExistentHost(t *testing.T) {
+	dir := t.TempDir()
+	pinDir = dir
+
+	// Removing a pin for a host that was never added should not error.
+	if err := runPinRemove(nil, []string{"ghost-host", "8080"}); err != nil {
+		t.Errorf("unexpected error removing non-existent pin: %v", err)
+	}
+}
