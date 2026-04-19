@@ -61,3 +61,11 @@ func TestCompare_InsufficientEntries(t *testing.T) {
 		t.Errorf("expected no deltas for host with single entry, got %d", len(deltas))
 	}
 }
+
+func TestCompare_EmptyStore(t *testing.T) {
+	store := &Store{}
+	deltas := Compare(store)
+	if len(deltas) != 0 {
+		t.Errorf("expected no deltas for empty store, got %d", len(deltas))
+	}
+}
