@@ -12,7 +12,8 @@ type HostScore struct {
 }
 
 // Score computes a simple risk score per host from the watch log.
-// Score = openings*2 + closings weighted by recency (later events count more).
+// Score = (openings*2 + closings) / total_changes, so hosts with more
+// port openings relative to closings rank higher.
 func Score(dir string) ([]HostScore, error) {
 	log, err := LoadWatchLog(dir)
 	if err != nil {
@@ -50,6 +51,17 @@ func Score(dir string) ([]HostScore, error) {
 		return results[i].Score > results[j].Score
 	})
 	return results, nil
+}
+
+// TopN returns up to n highest-scored hosts from the provided scores slice.
+func TopN(scores []HostScore, n int) []HostScore {
+	if n <= 0 || len(scores) == 0 {
+		return nil
+	}
+	if n > len(scores) {
+		n = len(scores)
+	}
+	return scores[:n]
 }
 
 func max1(n int) int {
