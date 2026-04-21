@@ -42,6 +42,21 @@ func Search(store *Store, q SearchQuery) []SearchResult {
 	return results
 }
 
+// Latest returns the most recent SearchResult from the given slice, or nil if
+// the slice is empty.
+func Latest(results []SearchResult) *SearchResult {
+	if len(results) == 0 {
+		return nil
+	}
+	latest := &results[0]
+	for i := 1; i < len(results); i++ {
+		if results[i].Entry.Timestamp.After(latest.Entry.Timestamp) {
+			latest = &results[i]
+		}
+	}
+	return latest
+}
+
 func containsPort(ports []int, port int) bool {
 	for _, p := range ports {
 		if p == port {
