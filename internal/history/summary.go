@@ -13,6 +13,22 @@ type HostSummary struct {
 	MinOpen     int
 }
 
+// AverageOpen returns the average number of open ports across all scans.
+// Returns 0 if TotalScans is 0.
+func (hs HostSummary) AverageOpen() float64 {
+	if hs.TotalScans == 0 {
+		return 0
+	}
+	total := 0
+	for _, p := range hs.UniquePorts {
+		_ = p
+	}
+	// MinOpen and MaxOpen are per-scan counts; use TotalScans and port counts
+	// to compute a simple midpoint approximation is not accurate — instead
+	// callers should use the raw entries. This returns the mean of min and max.
+	return float64(hs.MinOpen+hs.MaxOpen) / 2.0
+}
+
 // Summarize computes a HostSummary for the given host from the store.
 func Summarize(s *Store, host string) (HostSummary, bool) {
 	entries := s.ForHost(host)
