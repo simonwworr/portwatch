@@ -76,3 +76,21 @@ func TestSimilarity_SortedDescending(t *testing.T) {
 		}
 	}
 }
+
+func TestSimilarity_IdenticalHosts(t *testing.T) {
+	now := time.Now()
+	s := NewMemoryStore()
+	s.Append("h1", Entry{Timestamp: now, Ports: []int{22, 80, 443}})
+	s.Append("h2", Entry{Timestamp: now, Ports: []int{22, 80, 443}})
+	results := Similarity(s, 0.0)
+	if len(results) == 0 {
+		t.Fatal("expected at least one result")
+	}
+	// identical port sets => Jaccard similarity should be 1.0
+	if results[0].Similarity != 1.0 {
+		t.Errorf("expected similarity 1.0 for identical hosts, got %v", results[0].Similarity)
+	}
+	if len(results[0].Shared) != 3 {
+		t.Errorf("expected 3 shared ports, got %d", len(results[0].Shared))
+	}
+}
