@@ -16,6 +16,10 @@ type ShadowPort struct {
 
 // Shadow detects ports that appear for fewer than minScans scans across all
 // entries for each host, flagging them as transient or "shadow" ports.
+// A host must have at least minScans total scan entries to be considered;
+// hosts with fewer entries are skipped to avoid false positives on new hosts.
+// A port is flagged as a shadow port if it appeared in at most maxAppearances
+// of the scans recorded for that host.
 func Shadow(store Store, minScans int, maxAppearances int) []ShadowPort {
 	hosts := store.Hosts()
 	var results []ShadowPort
@@ -66,4 +70,10 @@ func Shadow(store Store, minScans int, maxAppearances int) []ShadowPort {
 		return results[i].Port < results[j].Port
 	})
 	return results
+}
+
+// Duration returns the time elapsed between the first and last time this
+// shadow port was observed. Returns zero for ports seen only once.
+func (s ShadowPort) Duration() time.Duration {
+	return s.LastSeen.Sub(s.FirstSeen)
 }
