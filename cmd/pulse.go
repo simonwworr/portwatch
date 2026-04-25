@@ -33,6 +33,10 @@ func init() {
 }
 
 func runPulse(dir string, days int, format string) error {
+	if days <= 0 {
+		return fmt.Errorf("--days must be a positive integer, got %d", days)
+	}
+
 	store, err := history.Load(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -53,14 +57,21 @@ func runPulse(dir string, days int, format string) error {
 	switch format {
 	case "json":
 		return json.NewEncoder(os.Stdout).Encode(results)
+	case "text":
+		printPulseTable(results)
 	default:
-		fmt.Printf("%-20s  %6s  %6s  %6s  %6s  %8s\n",
-			"HOST", "PULSE", "SCANS", "ACTIVE", "TOTAL", "AVG_PORTS")
-		fmt.Println("------------------------------------------------------------------")
-		for _, r := range results {
-			fmt.Printf("%-20s  %6.3f  %6d  %6d  %6d  %8.2f\n",
-				r.Host, r.PulseScore, r.ScanCount, r.ActiveDays, r.TotalDays, r.AvgPorts)
-		}
+		return fmt.Errorf("unknown format %q: must be \"text\" or \"json\"", format)
 	}
 	return nil
+}
+
+// printPulseTable renders pulse results as a formatted text table to stdout.
+func printPulseTable(results []history.PulseResult) {
+	fmt.Printf("%-20s  %6s  %6s  %6s  %6s  %8s\n",
+		"HOST", "PULSE", "SCANS", "ACTIVE", "TOTAL", "AVG_PORTS")
+	fmt.Println("------------------------------------------------------------------")
+	for _, r := range results {
+		fmt.Printf("%-20s  %6.3f  %6d  %6d  %6d  %8.2f\n",
+			r.Host, r.PulseScore, r.ScanCount, r.ActiveDays, r.TotalDays, r.AvgPorts)
+	}
 }
